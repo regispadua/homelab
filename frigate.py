@@ -13,14 +13,14 @@ glpi_base_url = 'http://192.168.1.23/apirest.php'
 glpi_login_url = f'{glpi_base_url}/initSession'
 glpi_logout_url = f'{glpi_base_url}/killSession'
 glpi_ticket_url = f'{glpi_base_url}/ticket'
-glpi_app_token = os.getenv('GLPI_APP_TOKEN', 'vjaAnmXpHYVxikl6vF8IgBTg7LbQ7tmQz5SY0Ae2')
-glpi_user_token = os.getenv('GLPI_USER_TOKEN', 'TDQ9j1Xscgk6ofaT0hUDk9R5U6RwWLEjvtVs7JFZ')
+glpi_app_token = os.getenv('GLPI_APP_TOKEN', 'SEU_TOKEN_AQUI')
+glpi_user_token = os.getenv('GLPI_USER_TOKEN', 'SEU_TOKEN_AQUI')
 
 # Configurações do MQTT
 mqtt_broker = '192.168.1.3'
 mqtt_topic = 'frigate/events'
-mqtt_user = 'mosquitto'
-mqtt_password = os.getenv('MQTT_PASSWORD', 'Acesso2024')
+mqtt_user = 'USER'
+mqtt_password = os.getenv('MQTT_PASSWORD', 'PASSWORD')
 
 # Configuração de logging
 logging.basicConfig(
