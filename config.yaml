@@ -1,0 +1,467 @@
+#Arquivo config.yml
+#Inicio do arquivo config.yml
+#Arquivo de configuração para o Frigate, modelo a ser usado em VM dentro do PROXMOX com DEBIAN 11
+#Criado por: Regis Padua
+#Date: 13/07/2024
+#Atualizado em: 05/01/2025
+#Substituir a URL do RTSP pelo o seu em uso.
+#Referencia: https://docs.frigate.video/
+#----------------------------------------------------------------------------------
+#Configuração do MQTT
+mqtt:
+  enabled: true
+  host: {O IP DO SEU MQTT, NO MEU CASO TENHO UM SERVIDOR DEDICADO}
+  port: 1883
+  client_id: frigate
+  topic_prefix: frigate/events
+  user: {O USUÁRIO DE CONEXÃO COM O MQTT}
+  password: {SENHA DE ACESSO AO MQTT}
+#----------------------------------------------------------------------------------
+#Versão do Frigate
+version: 0.15-0
+#----------------------------------------------------------------------------------
+#Banco de Dados
+database:
+  path: /config/frigate.db
+#----------------------------------------------------------------------------------
+tls:
+  enabled: false
+auth:
+  enabled: true
+  reset_admin_password: false
+  cookie_secure: true
+  session_length: 86400
+  refresh_time: 43200
+  failed_login_rate_limit: none
+#----------------------------------------------------------------------------------
+#LOG
+logger:
+  default: info
+  logs:
+    frigate.events: info
+    frigate.mqtt: info
+    frigate.app: info
+    frigate.object_detection: info
+#----------------------------------------------------------------------------------
+ffmpeg:
+  global_args: -hide_banner -loglevel warning -threads 4
+  hwaccel_args: -hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format
+    yuv420p
+  input_args: preset-rtsp-generic
+  output_args:
+    detect: -threads 4 -f rawvideo -pix_fmt yuv420p
+    record: preset-record-generic
+  retry_interval: 10
+#----------------------------------------------------------------------------------
+#Configuração Detectors
+detectors:
+  OV:
+    type: openvino
+    device: GPU
+    model:
+      path: /openvino-model/ssdlite_mobilenet_v2.xml
+model:
+  width: 300
+  height: 300
+  input_tensor: nhwc
+  input_pixel_format: bgr
+  labelmap_path: /openvino-model/coco_91cl_bkgr.txt
+#----------------------------------------------------------------------------------
+#Configuração Telemetria
+telemetry:
+  network_interfaces:
+    - ens18
+  stats:
+    network_bandwidth: true
+    amd_gpu_stats: false
+    intel_gpu_stats: true
+  version_check: false
+#----------------------------------------------------------------------------------
+#Congiguração para os snapshots
+#Salvar instantaneos por 7 dias
+snapshots:
+  enabled: true
+  clean_copy: true
+  timestamp: true
+  bounding_box: true
+  crop: false
+  retain:
+    default: 7
+  quality: 60
+#----------------------------------------------------------------------------------
+#Configuração de Gravacao
+#Salve todos os vídeos com qualquer movimento detectável por 7 dias,
+#independentemente de quaisquer objetos terem sido detectados ou não
+record:
+  enabled: true
+  sync_recordings: true
+  export:
+    timelapse_args: -vf setpts=PTS/60 -r 15
+  retain:
+    days: 7
+    mode: motion
+  preview:
+    quality: low
+#----------------------------------------------------------------------------------
+  alerts:
+    retain:
+      days: 1
+    pre_capture: 5
+    post_capture: 5
+  detections:
+    retain:
+      days: 1
+    pre_capture: 3
+    post_capture: 3
+detect:
+  width: 640
+  height: 480
+  fps: 05
+  enabled: true
+  min_initialized: 3
+  max_disappeared: 20
+  stationary:
+    interval: 50
+    threshold: 50
+    max_frames:
+      default: 3000
+#----------------------------------------------------------------------------------
+review:
+  alerts:
+    labels:
+      - person
+      - face
+      - truck
+      - dog
+      - laptop
+      - mouse
+      - remote
+      - keyboard
+      - cell phone
+      - hat
+      - backpack
+      - umbrella
+      - shoe
+      - eye glasses
+      - handbag
+      - tie
+      - suitcase
+      - frisbee
+      - skis
+      - snowboard
+      - surfboard
+      - tennis racket
+      - bottle
+      - plate
+      - wine glass
+      - cup
+      - fork
+      - knife
+      - spoon
+      - bowl
+      - banana
+      - apple
+      - sandwich
+      - orange
+      - broccoli
+      - carrot
+      - hot dog
+      - pizza
+      - donut
+      - cake
+      - chair
+      - couch
+      - potted plant
+      - bed
+      - mirror
+      - dinning table
+      - window
+      - desk
+      - door
+      - tv
+      - book
+      - clock
+      - vase
+      - teddy bear
+      - hair drier
+      - toothbrush
+      - hair brush
+
+  detections:
+    labels:
+      - person
+      - face
+      - truck
+      - dog
+      - laptop
+      - mouse
+      - remote
+      - keyboard
+      - cell phone
+      - hat
+      - backpack
+      - umbrella
+      - shoe
+      - eye glasses
+      - handbag
+      - tie
+      - suitcase
+      - frisbee
+      - skis
+      - snowboard
+      - surfboard
+      - tennis racket
+      - bottle
+      - plate
+      - wine glass
+      - cup
+      - fork
+      - knife
+      - spoon
+      - bowl
+      - banana
+      - apple
+      - sandwich
+      - orange
+      - broccoli
+      - carrot
+      - hot dog
+      - pizza
+      - donut
+      - cake
+      - chair
+      - couch
+      - potted plant
+      - bed
+      - mirror
+      - dinning table
+      - window
+      - desk
+      - door
+      - tv
+      - book
+      - clock
+      - vase
+      - teddy bear
+      - hair drier
+      - toothbrush
+      - hair brush
+
+#----------------------------------------------------------------------------------
+motion:
+  enabled: true
+  threshold: 50
+  lightning_threshold: 0.9
+  contour_area: 50
+  frame_alpha: 0.85
+  frame_height: 95
+  improve_contrast: true
+  mqtt_off_delay: 30
+#----------------------------------------------------------------------------------
+genai:
+  enabled: true
+  provider: gemini
+  api_key: {Inserir aqui sua api Key do Google-Gemini}
+  model: gemini-1.5-flash
+  prompt: Descrever seu prompt para uso do Gemini - para uso geral.
+  object_prompts:
+    person: Descrever seu prompt para uso do Gemini - para com o objeto de pessoas.
+    car: Descrever seu prompt para uso do Gemini - para uso com o objeto carros.
+#----------------------------------------------------------------------------------
+#Configuração G02RTC
+go2rtc:
+  live:
+    height: 640
+    quality: 06
+  timestamp_style:
+    position: tl
+    format: '%d/%m/%Y %H:%M:%S'
+    color:
+      red: 255
+      green: 255
+      blue: 255
+    thickness: 3
+    effect: solid
+  streams:
+    Camera_01:
+      - rtsp://user:password@xxx.xxx.xxx.xxx:554/cam/realmonitor?channel=1&subtype=0
+    Camera_02:
+      - rtsp://user:password@xxx.xxx.xxx.xxx:554/cam/realmonitor?channel=1&subtype=0
+    Camera_03:
+      - rtsp://user:password@xxx.xxx.xxx.xxx:554/cam/realmonitor?channel=1&subtype=0
+    Camera_04:
+      - rtsp://user:password@xxx.xxx.xxx.xxx:554/cam/realmonitor?channel=1&subtype=0
+    Camera_05:
+      - rtsp://user:password@xxx.xxx.xxx.xxx:554/cam/realmonitor?channel=1&subtype=0
+    Camera_06:
+      - rtsp://user:password@xxx.xxx.xxx.xxx:554/cam/realmonitor?channel=1&subtype=0
+  webrtc:
+    candidates:
+      - XXX.XXX.XXX.XXX:8555
+      - stun:8555
+#----------------------------------------------------------------------------------
+#Configuração Câmera
+cameras:
+#Camera01
+  Camera_01: #Nome da camera
+    detect:
+      stationary:
+        interval: 50
+        threshold: 50
+      width: 640
+      height: 480
+      fps: 05
+    enabled: true
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/Camera_01
+          input_args: preset-rtsp-restream
+          roles:
+            - detect
+            - record
+    live:
+      height: 640
+    objects:
+      track:
+        - person
+        - face
+        - truck
+        - dog
+        - laptop
+        - mouse
+        - remote
+        - keyboard
+        - cell phone
+        - hat
+        - backpack
+        - umbrella
+        - shoe
+        - eye glasses
+        - handbag
+        - tie
+        - suitcase
+        - frisbee
+        - skis
+        - snowboard
+        - surfboard
+        - tennis racket
+        - bottle
+        - plate
+        - wine glass
+        - cup
+        - fork
+        - knife
+        - spoon
+        - bowl
+        - banana
+        - apple
+        - sandwich
+        - orange
+        - broccoli
+        - carrot
+        - hot dog
+        - pizza
+        - donut
+        - cake
+        - chair
+        - couch
+        - potted plant
+        - bed
+        - mirror
+        - dinning table
+        - window
+        - desk
+        - door
+        - tv
+        - book
+        - clock
+        - vase
+        - teddy bear
+        - hair drier
+        - toothbrush
+        - hair brush
+
+#Camera02
+  Camera_02: #Nome da camera
+    detect:
+      stationary:
+        interval: 50
+        threshold: 50
+      width: 640
+      height: 480
+      fps: 05
+    enabled: true
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/Camera_02
+          input_args: preset-rtsp-restream
+          roles:
+            - detect
+            - record
+    live:
+      height: 640
+    objects:
+      track:
+        - person
+        - face
+        - truck
+        - dog
+        - laptop
+        - mouse
+        - remote
+        - keyboard
+        - cell phone
+        - hat
+        - backpack
+        - umbrella
+        - shoe
+        - eye glasses
+        - handbag
+        - tie
+        - suitcase
+        - frisbee
+        - skis
+        - snowboard
+        - surfboard
+        - tennis racket
+        - bottle
+        - plate
+        - wine glass
+        - cup
+        - fork
+        - knife
+        - spoon
+        - bowl
+        - banana
+        - apple
+        - sandwich
+        - orange
+        - broccoli
+        - carrot
+        - hot dog
+        - pizza
+        - donut
+        - cake
+        - chair
+        - couch
+        - potted plant
+        - bed
+        - mirror
+        - dinning table
+        - window
+        - desk
+        - door
+        - tv
+        - book
+        - clock
+        - vase
+        - teddy bear
+        - hair drier
+        - toothbrush
+        - hair brush
+
+
+semantic_search:
+  enabled: true
+  reindex: false
+  model_size: small
