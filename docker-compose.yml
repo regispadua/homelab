@@ -1,0 +1,44 @@
+#version: '3'
+networks:
+  net:
+services:
+  redis:
+    image: redis:7.2.3-alpine3.18
+    networks: [net]
+    restart: always
+    command:
+      - 'redis-server'
+      - '--save 900 1'
+      - '--save 300 10'
+      - '--save 60 100'
+    volumes:
+      - /mnt/docker/redis/data:/data
+  frigate-telegram:
+    image: ghcr.io/oldtyt/frigate-telegram:amd6  
+    restart: always
+    command:
+      - 'redis-server'
+      - '--save 900 1'
+      - '--save 300 10'
+      - '--save 60 100'
+    volumes:
+      - /mnt/docker/redis/data:/data
+  frigate-telegram:
+    image: ghcr.io/oldtyt/frigate-telegram:amd64
+    restart: always
+    networks: [net]
+    environment:
+      TELEGRAM_BOT_TOKEN: [INSERIR SEU BOT_TOKEN]
+      FRIGATE_URL: [INSERIR A URL DO SEU FRIGATE]
+      FRIGATE_EVENT_LIMIT: 5
+      DEBUG: true
+      TELEGRAM_CHAT_ID: "-1002350698030"
+      SLEEP_TIME: 30
+      FRIGATE_EXTERNAL_URL: [INSERIR A URL EXTERNA DO SEU FRIGATE]
+      TZ: America/Sao_Paulo
+      REDIS_ADDR: "redis:6379"
+    volumes:
+      - type: tmpfs # Optional
+        target: /tmp
+        tmpfs:
+          size: 10000000
